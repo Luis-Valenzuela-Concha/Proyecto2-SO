@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include <string.h>
+#include <filesystem>
+#include <thread>
+#include <semaphore>
 
 using namespace std;
 
@@ -15,6 +18,14 @@ vector<string> copiarArchivoString(string nombreArchivo){
     return vec;
 }
 
+vector<string> obtenerArchivosEnDirectorio(const string& ruta) {
+    vector<string> archivos;
+    for (const auto& entrada : filesystem::directory_iterator(ruta)) {
+        archivos.push_back(entrada.path().string());
+    }
+    return archivos;
+}
+
 bool procesarGenoma(vector<string> genoma, float umbral) {
     int CG = 0;
     int total = 0;
@@ -28,10 +39,11 @@ bool procesarGenoma(vector<string> genoma, float umbral) {
     return CG / (float)total >= umbral;
 }
 
-int main() {
-    vector<string> vec = copiarArchivoString("GCF_000717965.1_ASM71796v1_genomic.fna");
-    for (int i = 0; i < vec.size(); i++) {
-        cout << vec[i] << endl;
+int main(int argc, char const *argv[]) {
+    vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
+    vector<vector<string>> genomas;
+    for(int i = 0; i < nombreArchivos.size(); i++) {
+        genomas.push_back(copiarArchivoString(nombreArchivos[i]));
     }
     return 0;
 }
