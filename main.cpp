@@ -1,12 +1,13 @@
 #include <bits/stdc++.h>
 #include <string.h>
+
 #include <filesystem>
-#include <thread>
 #include <semaphore>
+#include <thread>
 
 using namespace std;
 
-vector<string> copiarArchivoString(string nombreArchivo){
+vector<string> copiarArchivoString(string nombreArchivo) {
     ifstream archivo(nombreArchivo);
     vector<string> vec;
     string linea;
@@ -39,11 +40,13 @@ bool procesarGenoma(vector<string> genoma, float umbral) {
     return CG / (float)total >= umbral;
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const* argv[]) {
     vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
     vector<vector<string>> genomas;
-    for(int i = 0; i < nombreArchivos.size(); i++) {
+    for (int i = 0; i < nombreArchivos.size(); i++) {
         genomas.push_back(copiarArchivoString(nombreArchivos[i]));
     }
+
+    queue<string> colaCompartida;
     return 0;
 }
