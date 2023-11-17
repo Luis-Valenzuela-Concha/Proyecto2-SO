@@ -80,22 +80,24 @@ void printGenomas(){
 }
 
 int main(int argc, char const *argv[]) {
-    //Extrae contenidos de archivos
-    vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
-    umbral = atof(argv[2]);
-    bool flag;
-    if(argv[3] == "mutex") flag = true;
-    else if(argv[3] == "sem") flag = false;
-    else{
-        cout << "Error en el tercer argumento" << endl;
-        return 0;
-    }
-
     if(argc != 4){
         cout << "Error en la cantidad de argumentos" << endl;
         return 0;
     }
     
+    bool flag;
+    string argumento = argv[3];
+    if(argumento == "mutex") flag = true;
+    else if(argumento == "sem") flag = false;
+    else{
+        cout << "Error en el tercer argumento" << endl;
+        return 0;
+    }
+    
+    //Extrae contenidos de archivos
+    vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
+    umbral = atof(argv[2]);
+
     //Inicializar locks
     pthread_mutex_init(&mutex_lock, NULL);
     sem_init(&sem, 0, 1);
