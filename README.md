@@ -10,6 +10,6 @@
 ## Compilacion y ejecucion
 Para compilar el proyecto se debe ejecutar el siguiente comando:
 ```
-g++ main.cpp && ./a.out
+g++ main.cpp && ./a.out genomas 0
 ```
 

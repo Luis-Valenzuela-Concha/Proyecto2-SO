@@ -33,12 +33,13 @@ vector<string> obtenerArchivosEnDirectorio(const string& ruta) {
     return archivos;
 }
 
-bool procesarGenoma(vector<string> genoma, float umbral) {
-    cout << genoma.size() << endl;
+bool procesarGenoma(vector<string>* genoma, float umbral) {
+    cout << "entra funcion" << endl;
+    cout << genoma->size() << endl;
     int CG = 0;
     int total = 0;
-    for (int i = 0; i < genoma.size(); i++) {
-        string linea = genoma[i];
+    for (int i = 0; i < genoma->size(); i++) {
+        string linea = genoma->at(i);
         for (int j = 0; j < linea.size(); j++) {
             if (linea[j] == 'C' || linea[j] == 'G') CG++;
             total++;
@@ -60,7 +61,7 @@ void *procesarGenomaThread(void *arg) {
     cout << "entra funcion" << endl;
     vector<string> *genoma = static_cast<vector<string>*>(arg);
     //cout << genoma->size() << endl;
-    bool esGenoma = procesarGenoma(*genoma, umbral);
+    bool esGenoma = procesarGenoma(genoma, umbral);
 
     pthread_exit(NULL);
 }
