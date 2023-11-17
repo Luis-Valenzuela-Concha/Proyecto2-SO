@@ -47,6 +47,7 @@ bool procesarGenoma(vector<string> genoma, float umbral) {
     return CG / (float)total >= umbral;
 }
 
+/*
 void *procesarGenomaThread(void *arg) {
     cout << "entra funcion" << endl;
     vector<string> genoma = *(vector<string>*) arg;
@@ -54,7 +55,16 @@ void *procesarGenomaThread(void *arg) {
     bool esGenoma = procesarGenoma(genoma,umbral);
 
     pthread_exit(NULL);
+}*/
+void *procesarGenomaThread(void *arg) {
+    cout << "entra funcion" << endl;
+    vector<string> *genoma = static_cast<vector<string>*>(arg);
+    //cout << genoma->size() << endl;
+    bool esGenoma = procesarGenoma(*genoma, umbral);
+
+    pthread_exit(NULL);
 }
+
 
 int main(int argc, char const *argv[]) {
     //Extrae contenidos de archivos
