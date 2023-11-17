@@ -12,8 +12,7 @@ pthread_mutex_t mutex_lock;
 queue<string> cola_compartida;
 float umbral;
 
-
-vector<string> copiarArchivoString(string nombreArchivo){
+vector<string> copiarArchivoString(string &nombreArchivo){
     ifstream archivo(nombreArchivo);
     vector<string> vec;
     string linea;
@@ -34,11 +33,10 @@ vector<string> obtenerArchivosEnDirectorio(const string& ruta) {
 }
 
 bool procesarGenoma(vector<string> genoma, float umbral) {
-    cout << genoma.size() << endl;
     int CG = 0;
     int total = 0;
     for (int i = 0; i < genoma.size(); i++) {
-        string linea = genoma[i];
+        string linea = genoma[0];
         for (int j = 0; j < linea.size(); j++) {
             if (linea[j] == 'C' || linea[j] == 'G') CG++;
             total++;
@@ -47,20 +45,15 @@ bool procesarGenoma(vector<string> genoma, float umbral) {
     return CG / (float)total >= umbral;
 }
 
-/*
 void *procesarGenomaThread(void *arg) {
-    cout << "entra funcion" << endl;
-    vector<string> genoma = *(vector<string>*) arg;
-    //cout << genoma.size() << endl;
-    bool esGenoma = procesarGenoma(genoma,umbral);
-
-    pthread_exit(NULL);
-}*/
-void *procesarGenomaThread(void *arg) {
-    cout << "entra funcion" << endl;
-    vector<string> *genoma = static_cast<vector<string>*>(arg);
-    //cout << genoma->size() << endl;
-    bool esGenoma = procesarGenoma(*genoma, umbral);
+    string *archivo = static_cast<string*>(arg);
+    vector<string> genoma = copiarArchivoString(*archivo);
+    bool procesar = procesarGenoma(genoma,umbral);
+    if(procesar){
+        pthread_mutex_lock(&mutex_lock);
+        cola_compartida.push(*archivo);
+        pthread_mutex_unlock(&mutex_lock);
+    }
 
     pthread_exit(NULL);
 }
@@ -69,21 +62,27 @@ void *procesarGenomaThread(void *arg) {
 int main(int argc, char const *argv[]) {
     //Extrae contenidos de archivos
     vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
-    vector<vector<string>> genomas;
-    for (int i = 0; i < nombreArchivos.size(); i++) {
-        genomas.push_back(copiarArchivoString(nombreArchivos[i]));
-    }
 
-    int NUM_THREADS = genomas.size();
+    int NUM_THREADS = nombreArchivos.size();
     pthread_t threads[NUM_THREADS];
     
     //Inicializar lock
     pthread_mutex_init(&mutex_lock, NULL);
     umbral = atof(argv[2]);
-
     //Crear threads
     for(int i = 0; i < NUM_THREADS; i++) {
-        pthread_create(&threads[i], NULL, procesarGenomaThread, &genomas[i]);
+        pthread_create(&threads[i], NULL, procesarGenomaThread, &nombreArchivos[i]);
+    }
+
+    for(int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+    pthread_mutex_destroy(&mutex_lock);
+    
+    cout << "Genomas que superan el umbral: " << endl;
+    while(!cola_compartida.empty()){
+        cout << cola_compartida.front() << endl;
+        cola_compartida.pop();
     }
 
     return 0;
