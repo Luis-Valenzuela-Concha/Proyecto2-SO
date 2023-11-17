@@ -3,11 +3,11 @@
 
 #include <filesystem>
 #include <pthread.h>
-#include <semaphore>
-#include <thread>
+#include <semaphore.h>
 
 using namespace std;
 
+sem_t sem;
 pthread_mutex_t mutex_lock;
 queue<string> cola_compartida;
 float umbral;
@@ -45,14 +45,27 @@ bool procesarGenoma(vector<string> genoma, float umbral) {
     return CG / (float)total >= umbral;
 }
 
-void *procesarGenomaThread(void *arg) {
+void *procesarGenoma_mutex_cv(void *arg) {
     string *archivo = static_cast<string*>(arg);
     vector<string> genoma = copiarArchivoString(*archivo);
-    bool procesar = procesarGenoma(genoma,umbral);
-    if(procesar){
+
+    if(procesarGenoma(genoma,umbral)){
         pthread_mutex_lock(&mutex_lock);
         cola_compartida.push(*archivo);
         pthread_mutex_unlock(&mutex_lock);
+    }
+
+    pthread_exit(NULL);
+}
+
+void *procesarGenoma_semaforo(void *arg) {
+    string *archivo = static_cast<string*>(arg);
+    vector<string> genoma = copiarArchivoString(*archivo);
+
+    if(procesarGenoma(genoma,umbral)){
+        sem_wait(&sem);
+        cola_compartida.push(*archivo);
+        sem_post(&sem);
     }
 
     pthread_exit(NULL);
@@ -62,18 +75,21 @@ void *procesarGenomaThread(void *arg) {
 int main(int argc, char const *argv[]) {
     //Extrae contenidos de archivos
     vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
+    umbral = atof(argv[2]);
+    
+    //Inicializar locks
+    pthread_mutex_init(&mutex_lock, NULL);
+    sem_init(&sem, 0, 1);
 
+    //Crear hebras
     int NUM_THREADS = nombreArchivos.size();
     pthread_t threads[NUM_THREADS];
-    
-    //Inicializar lock
-    pthread_mutex_init(&mutex_lock, NULL);
-    umbral = atof(argv[2]);
-    //Crear threads
     for(int i = 0; i < NUM_THREADS; i++) {
-        pthread_create(&threads[i], NULL, procesarGenomaThread, &nombreArchivos[i]);
+        //pthread_create(&threads[i], NULL, procesarGenoma_mutex_cv, &nombreArchivos[i]);
+        pthread_create(&threads[i], NULL, procesarGenoma_semaforo, &nombreArchivos[i]);
     }
 
+    //Esperar a que terminen las hebras
     for(int i = 0; i < NUM_THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
