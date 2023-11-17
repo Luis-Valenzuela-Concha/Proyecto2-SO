@@ -1,8 +1,10 @@
 #include <bits/stdc++.h>
 #include <string.h>
+
 #include <filesystem>
 #include <pthread.h>
 #include <semaphore>
+#include <thread>
 
 using namespace std;
 
@@ -58,7 +60,7 @@ int main(int argc, char const *argv[]) {
     //Extrae contenidos de archivos
     vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
     vector<vector<string>> genomas;
-    for(int i = 0; i < nombreArchivos.size(); i++) {
+    for (int i = 0; i < nombreArchivos.size(); i++) {
         genomas.push_back(copiarArchivoString(nombreArchivos[i]));
     }
 
