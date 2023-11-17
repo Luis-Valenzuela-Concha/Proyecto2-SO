@@ -71,11 +71,30 @@ void *procesarGenoma_semaforo(void *arg) {
     pthread_exit(NULL);
 }
 
+void printGenomas(){
+    cout << "Genomas que superan el umbral: " << endl;
+    while(!cola_compartida.empty()){
+        cout << cola_compartida.front() << endl;
+        cola_compartida.pop();
+    }
+}
 
 int main(int argc, char const *argv[]) {
     //Extrae contenidos de archivos
     vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
     umbral = atof(argv[2]);
+    bool flag;
+    if(argv[3] == "mutex") flag = true;
+    else if(argv[3] == "sem") flag = false;
+    else{
+        cout << "Error en el tercer argumento" << endl;
+        return 0;
+    }
+
+    if(argc != 4){
+        cout << "Error en la cantidad de argumentos" << endl;
+        return 0;
+    }
     
     //Inicializar locks
     pthread_mutex_init(&mutex_lock, NULL);
@@ -85,8 +104,8 @@ int main(int argc, char const *argv[]) {
     int NUM_THREADS = nombreArchivos.size();
     pthread_t threads[NUM_THREADS];
     for(int i = 0; i < NUM_THREADS; i++) {
-        //pthread_create(&threads[i], NULL, procesarGenoma_mutex_cv, &nombreArchivos[i]);
-        pthread_create(&threads[i], NULL, procesarGenoma_semaforo, &nombreArchivos[i]);
+        if(flag) pthread_create(&threads[i], NULL, procesarGenoma_mutex_cv, &nombreArchivos[i]);
+        else pthread_create(&threads[i], NULL, procesarGenoma_semaforo, &nombreArchivos[i]);
     }
 
     //Esperar a que terminen las hebras
@@ -95,11 +114,7 @@ int main(int argc, char const *argv[]) {
     }
     pthread_mutex_destroy(&mutex_lock);
     
-    cout << "Genomas que superan el umbral: " << endl;
-    while(!cola_compartida.empty()){
-        cout << cola_compartida.front() << endl;
-        cola_compartida.pop();
-    }
+    printGenomas();
 
     return 0;
 }
