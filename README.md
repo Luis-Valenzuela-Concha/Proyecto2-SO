@@ -16,3 +16,10 @@ Un ejemplo de ejecucion seria:
 g++ main.cpp && ./a.out genomas 0.5 mutex
 ```
 
+### Evaluacion experimental
+Para la evaluacion experimental se debe probar el ejecutable de la siguiente manera:
+```
+/usr/bin/time -v ./a.out genomas 0.5 mutex
+```
+
+
