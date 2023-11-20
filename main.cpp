@@ -77,34 +77,20 @@ int main(int argc, char const *argv[]) {
         cout << "Error en el tercer argumento: " << argv[3]<< endl;
         return 0;
     }
-    
+
     if(argc != 4){
         cout << "Error en la cantidad de argumentos" << endl;
         return 0;
     }
     
-    bool flag;
-    string argv3 = argv[3];
-    if(argv3 == "mutex") flag = true;
-    else if(argv3 == "sem") flag = false;
-    else{
-        cout << "Error en el tercer argumento" << endl;
-        return 0;
-    }
-    
-    //Extrae contenidos de archivos
-    vector<string> nombreArchivos = obtenerArchivosEnDirectorio(argv[1]);
-    
-    umbral = atof(argv[2]);
-
     //Inicializar locks
     pthread_mutex_init(&mutex_lock, NULL);
     pthread_cond_init(&c, NULL);
     sem_init(&sem, 0, 1);
 
     //Crear hebras
-    //int NUM_THREADS = nombreArchivos.size();
-    int NUM_THREADS = 2;
+    int NUM_THREADS = nombreArchivos.size();
+    //int NUM_THREADS = 8;
     pthread_t threads[NUM_THREADS];
     for(int i = 0; i < NUM_THREADS; i++) {
         if(flag) pthread_create(&threads[i], NULL, superaUmbral_mutex_cv, &nombreArchivos[i]);
